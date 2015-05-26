@@ -346,13 +346,15 @@
    <value name="DELAYED" const="4"/>
    <value name="GONE" const="5"/>
   </enum>
-  <struct name="__unnamed_struct_1" line="12" file="PS2\ps2_keyboard.h">
+  <struct name="__unnamed_struct_1" line="13" file="PS2\ps2_keyboard.h">
    <member name="new_data" offset="0" size="8"
     basetype="CHAR" baseattr="unsigned,"/>
    <member name="usbkb_buf" offset="8" size="64"
     basetype="CHAR" baseattr="unsigned," basearray="8,"/>
    <member name="keys_buf" offset="72" size="112"
     basetype="CHAR" baseattr="unsigned," basearray="14,"/>
+   <member name="scan_buf" offset="184" size="224"
+    basetype="CHAR" baseattr="unsigned," basearray="28,"/>
   </struct>
   <struct name="__unnamed_struct_2" line="44" file="C:\ProgramData\FTDI\Vinculum II Toolchain\Firmware\kernel\include\dma.h">
    <member name="io_addr" offset="0" size="16"
@@ -450,13 +452,15 @@
    basename="_vos_driver_t" basetype="STRUCT" baseattr=""/>
   <typedef name="vos_system_data_area_t" line="198" file="C:\ProgramData\FTDI\Vinculum II Toolchain\Firmware\kernel\include\vos.h"
    basename="_vos_system_data_area_t" basetype="STRUCT" baseattr=""/>
-  <struct name="PS2_keyboard_t" line="12" file="PS2\ps2_keyboard.h"    attr="" size="184">
+  <struct name="PS2_keyboard_t" line="13" file="PS2\ps2_keyboard.h"    attr="" size="408">
    <member name="new_data" offset="0" size="8"
     basetype="CHAR" baseattr="unsigned,"/>
    <member name="usbkb_buf" offset="8" size="64"
     basetype="CHAR" baseattr="unsigned," basearray="8,"/>
    <member name="keys_buf" offset="72" size="112"
     basetype="CHAR" baseattr="unsigned," basearray="14,"/>
+   <member name="scan_buf" offset="184" size="224"
+    basetype="CHAR" baseattr="unsigned," basearray="28,"/>
   </struct>
   <proto name="PF_IO" line="39" file="C:\ProgramData\FTDI\Vinculum II Toolchain\Firmware\kernel\include\vos.h"
    basetype="CHAR" baseattr="signed,">
@@ -518,39 +522,39 @@
    basename="_vos_tcb_t" basetype="STRUCT" baseattr=""/>
   <typedef name="ReportID_t" line="118" file="hidtypes.h"
    basename="_ReportID_t" basetype="STRUCT" baseattr=""/>
-  <proto name="USB_PS2" line="186" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <proto name="USB_PS2" line="200" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    basetype="CHAR" baseattr="unsigned,">
-   <var name="USB_code" line="186" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="USB_code" line="200" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="CHAR" baseattr="unsigned,"/>
   </proto>
-  <proto name="SET_BIT" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <proto name="SET_BIT" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    basetype="VOID" baseattr="">
-   <var name="wBYTE" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="wBYTE" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="SHORT" baseattr="unsigned,ptr,"/>
-   <var name="wBIT" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="wBIT" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="CHAR" baseattr="unsigned,"/>
   </proto>
-  <proto name="KBParse" line="87" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <proto name="KBParse" line="92" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    basetype="INT" baseattr="signed,">
-   <var name="pPS2_keyboard" line="87" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="pPS2_keyboard" line="92" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basename="__unnamed_struct_1" basetype="STRUCT" baseattr="ptr,"/>
   </proto>
-  <proto name="PS2_keyboard_init" line="81" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <proto name="PS2_keyboard_init" line="84" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    basetype="VOID" baseattr="">
-   <var name="pPS2_keyboard" line="81" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="pPS2_keyboard" line="84" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basename="__unnamed_struct_1" basetype="STRUCT" baseattr="ptr,"/>
   </proto>
-  <proto name="CHECK_BIT" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <proto name="CHECK_BIT" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    basetype="CHAR" baseattr="signed,">
-   <var name="wBYTE" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="wBYTE" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="SHORT" baseattr="unsigned,"/>
-   <var name="wBIT" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="wBIT" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="CHAR" baseattr="unsigned,"/>
   </proto>
@@ -1022,9 +1026,9 @@
   <proto name="vos_gpio_wait_on_all_ints" line="132" file="C:\ProgramData\FTDI\Vinculum II Toolchain\Firmware\kernel\include\gpioctrl.h"
    basetype="CHAR" baseattr="unsigned,">
   </proto>
-  <proto name="number" line="11" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <proto name="number" line="14" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    basetype="VOID" baseattr="">
-   <var name="val" line="11" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="val" line="14" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="CHAR" baseattr="unsigned,"/>
   </proto>
@@ -1109,9 +1113,9 @@
     type="AUTO" storage="AUTO VAR" attr="param,"
     basename="_vos_mutex_t" basetype="STRUCT" baseattr="ptr,"/>
   </proto>
-  <proto name="message" line="10" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <proto name="message" line="13" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    basetype="VOID" baseattr="">
-   <var name="msg" line="10" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+   <var name="msg" line="13" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="CHAR" baseattr="signed,ptr,"/>
   </proto>
@@ -1292,127 +1296,137 @@
     type="AUTO" storage="AUTO VAR" attr="param,"
     basetype="CHAR" baseattr="unsigned,"/>
   </proto>
-  <var name="Fkeys" line="13" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <var name="Fkeys" line="16" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    type="AUTO" storage="AUTO VAR" attr="global,"
    basetype="CHAR" baseattr="unsigned," basearray="8,"/>
-  <var name="USB_PS2_tb" line="16" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <var name="USB_PS2_tb" line="19" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    type="AUTO" storage="AUTO VAR" attr="global,"
    basetype="CHAR" baseattr="unsigned," basearray="256,"/>
- <function name="SET_BIT" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
+ <function name="SET_BIT" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
   basetype="VOID" baseattr="">
-  <var name="wBYTE" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <var name="wBYTE" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    type="AUTO" storage="AUTO VAR" attr="param,"
    basetype="SHORT" baseattr="unsigned,ptr,"/>
-  <var name="wBIT" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <var name="wBIT" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    type="AUTO" storage="AUTO VAR" attr="param,"
    basetype="CHAR" baseattr="unsigned,"/>
-  <block line="66" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    <var name="wBIT" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <block line="69" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <var name="wBIT" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr="param,"
      basetype="CHAR" baseattr="unsigned,"/>
-    <var name="wBYTE" line="65" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="wBYTE" line="68" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr="param,"
      basetype="SHORT" baseattr="unsigned,ptr,"/>
   </block>
  </function>
- <function name="CHECK_BIT" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
+ <function name="CHECK_BIT" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
   basetype="CHAR" baseattr="signed,">
-  <var name="wBYTE" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <var name="wBYTE" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    type="AUTO" storage="AUTO VAR" attr="param,"
    basetype="SHORT" baseattr="unsigned,"/>
-  <var name="wBIT" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <var name="wBIT" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
    type="AUTO" storage="AUTO VAR" attr="param,"
    basetype="CHAR" baseattr="unsigned,"/>
-  <block line="76" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    <var name="wBIT" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <block line="79" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <var name="wBIT" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr="param,"
      basetype="CHAR" baseattr="unsigned,"/>
-    <var name="wBYTE" line="75" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="wBYTE" line="78" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr="param,"
      basetype="SHORT" baseattr="unsigned,"/>
   </block>
  </function>
- <function name="PS2_keyboard_init" line="81" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
+ <function name="PS2_keyboard_init" line="84" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
   basetype="VOID" baseattr="">
-  <block line="82" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    <var name="pPS2_keyboard" line="81" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <block line="85" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <var name="pPS2_keyboard" line="84" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr="param,"
      basename="__unnamed_struct_1" basetype="STRUCT" baseattr="ptr,"/>
   </block>
  </function>
- <function name="KBParse" line="87" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
+ <function name="KBParse" line="92" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
   basetype="INT" baseattr="signed,">
-  <block line="88" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    <var name="eol" line="92" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <block line="93" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <var name="eol" line="103" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr=""
      basetype="CHAR" baseattr="signed,ptr,"/>
-    <var name="keys_buf" line="97" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="test" line="98" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+     type="AUTO" storage="AUTO VAR" attr=""
+     basetype="SHORT" baseattr="unsigned,"/>
+    <var name="scan_buf" line="101" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+     type="AUTO" storage="AUTO VAR" attr=""
+     basetype="CHAR" baseattr="unsigned,ptr," basearray="28,"/>
+    <var name="new_data" line="102" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+     type="AUTO" storage="AUTO VAR" attr=""
+     basetype="CHAR" baseattr="unsigned,ptr,"/>
+    <var name="keys_buf" line="100" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr=""
      basetype="CHAR" baseattr="unsigned,ptr," basearray="14,"/>
-    <var name="release" line="95" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
-     type="AUTO" storage="AUTO VAR" attr=""
-     basetype="SHORT" baseattr="unsigned,"/>
-    <var name="i" line="90" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="i" line="94" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr=""
      basetype="CHAR" baseattr="unsigned,"/>
-    <var name="press" line="94" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
-     type="AUTO" storage="AUTO VAR" attr=""
-     basetype="SHORT" baseattr="unsigned,"/>
-    <var name="n" line="91" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="j" line="95" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr=""
      basetype="CHAR" baseattr="unsigned,"/>
-    <var name="pPS2_keyboard" line="87" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="n" line="96" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+     type="AUTO" storage="AUTO VAR" attr=""
+     basetype="CHAR" baseattr="unsigned,"/>
+    <var name="pPS2_keyboard" line="92" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr="param,"
      basename="__unnamed_struct_1" basetype="STRUCT" baseattr="ptr,"/>
-    <var name="Found" line="89" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="x" line="97" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr=""
-     basetype="INT" baseattr="signed,"/>
-    <var name="fkeys_buf" line="96" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+     basetype="CHAR" baseattr="unsigned,"/>
+    <var name="fkeys_buf" line="99" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr=""
      basetype="CHAR" baseattr="unsigned," basearray="8,"/>
-   <block line="107" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+   <block line="111" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
    </block>
-   <block line="110" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    <block line="111" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    </block>
-    <block line="113" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+   <block line="114" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <block line="115" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
     </block>
     <block line="117" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
     </block>
-    <block line="120" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <block line="121" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    </block>
+    <block line="125" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+     <block line="126" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+      <block line="127" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+      </block>
+     </block>
     </block>
    </block>
-   <block line="126" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    <block line="128" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-     <block line="132" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+   <block line="136" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <block line="138" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+     <block line="142" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
      </block>
     </block>
-    <block line="146" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-     <block line="147" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-     </block>
-     <block line="149" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-     </block>
-     <block line="154" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-     </block>
+    <block line="156" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
     </block>
-    <block line="170" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <block line="158" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
     </block>
-    <block line="172" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <block line="163" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    </block>
+    <block line="183" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    </block>
+    <block line="185" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
     </block>
    </block>
-   <block line="178" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+   <block line="191" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
    </block>
-   <block line="179" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+   <block line="192" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+   </block>
+   <block line="193" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
    </block>
   </block>
  </function>
- <function name="USB_PS2" line="186" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
+ <function name="USB_PS2" line="200" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c" 
   basetype="CHAR" baseattr="unsigned,">
-  <block line="187" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
-    <var name="PS2_code" line="188" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+  <block line="201" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c">
+    <var name="PS2_code" line="202" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr=""
      basetype="CHAR" baseattr="unsigned,"/>
-    <var name="USB_code" line="186" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
+    <var name="USB_code" line="200" file="C:\Users\mvv\Desktop\vnc2\PS2\ps2_keyboard.c"
      type="AUTO" storage="AUTO VAR" attr="param,"
      basetype="CHAR" baseattr="unsigned,"/>
   </block>

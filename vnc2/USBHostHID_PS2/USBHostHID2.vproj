@@ -762,31 +762,14 @@
 		<filename>ps2_keyboard.h</filename>
 	</BuildList>	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	<OpenFilesList>
 		<filename>USBHostHID2.c</filename>
 	</OpenFilesList>
 	<OpenFilesList>
 		<filename>ps2_keyboard.c</filename>
 		<actvieTabIndex>1</actvieTabIndex>
+	</OpenFilesList>
+	<OpenFilesList>
+		<filename>ps2_keyboard.h</filename>
 	</OpenFilesList>
 </Project>

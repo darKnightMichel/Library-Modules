@@ -1,7 +1,8 @@
-//-----------------------------------------------------------------[24.05.2015]
+//-----------------------------------------------------------------[25.05.2015]
 // 21.05.2015	dsp		initail relise
 // 22.05.2015	MVV		Bit 7=1 указывает на префикс 0xE0, добавлены: 0x00=Overrun Error, 0x80=POST Fail, 0x7f=None. Исправлен код Caps Lock
 // 24.05.2015	MVV		тестовая версия UART 9600 8bit nc stop1 nc
+// 25.05.2015	MVV		добавлен PS2_thread
 
 #include <string.h>
 #include "ps2_keyboard.h"
@@ -82,25 +83,31 @@ char CHECK_BIT(unsigned short  wBYTE, unsigned char wBIT)
  
 void PS2_keyboard_init(PS2_keyboard_t* pPS2_keyboard)
 {
+		pPS2_keyboard->new_data = 0x00;
+		memset(pPS2_keyboard->scan_buf, 0x00, 2 * sizeof(unsigned char));
 		memset(pPS2_keyboard->keys_buf, 0x00, 14 * sizeof(unsigned char));
 }
 
 // KB PARSER
 int KBParse(PS2_keyboard_t* pPS2_keyboard)
 {
-    int Found;
-    unsigned char  i;
-    unsigned char  j;
-    unsigned char  n;
+    unsigned char i;
+    unsigned char j;
+    unsigned char n;
+	unsigned char x;
     unsigned short test;
-    unsigned char  fkeys_buf[8];
-    unsigned char  *keys_buf[14];
-	         char  *eol = "\r\n";
+    unsigned char fkeys_buf[8];
+    unsigned char *keys_buf[14];
+    unsigned char *scan_buf[2];
+	unsigned char *new_data;
+	char *eol = "\r\n";
 
 	// check new keys
 	test = 0x0000;
-
-	message("*keys_buf: "); for (i=0; i<14; i++){ number(pPS2_keyboard->keys_buf[i] & 0xFF); message(" "); } message(eol);
+	x = 0x00;
+	
+	// log
+	message("keys_buf:  "); for (i=0; i<14; i++){ number(pPS2_keyboard->keys_buf[i]); message(" "); } message(eol);
 
 	// fkeys & keys
 	for (i=0; i<8; i++){
@@ -124,7 +131,8 @@ int KBParse(PS2_keyboard_t* pPS2_keyboard)
 		}
 	}
 
-	// 
+	pPS2_keyboard->new_data = 0x00;
+
 	for (i=0; i<14; i++){
 		// release 
 		if (CHECK_BIT(test, i) == 0x00){
@@ -154,18 +162,29 @@ int KBParse(PS2_keyboard_t* pPS2_keyboard)
 		message("n press: "); number(n); message(eol);
 		if (n > 0x80){
 			PS2KB_write(0xE0);	// Pref
+//			vos_delay_msecs(50);
 			PS2KB_write(n-0x80);
+//			vos_delay_msecs(100);
+			pPS2_keyboard->scan_buf[0] = 0xE0;
+			pPS2_keyboard->scan_buf[1] = n-0x80;
+			x = 0x01;
 		// log
 			message("PS2KB <- E0 "); number(n-0x80); message(eol);
 		} else if (n == 0x80){
 			PS2KB_write(0xFC);	//POST Fail
+			pPS2_keyboard->scan_buf[0] = 0xFC;
+			pPS2_keyboard->scan_buf[1] = 0xFC;
+			x = 0x01;
 			// log
 			message("PS2KB <- FC (POST Fail)"); message(eol);
 		} else if (n < 0x7F){
 			PS2KB_write(n);
+			pPS2_keyboard->scan_buf[0] = n;
+			pPS2_keyboard->scan_buf[1] = n;
+			x = 0x01;
 			// log
-			message("PS2KB <- ");	number(n); message(eol);
-		}
+			message("PS2KB <- "); number(n); message(eol);
+		}		
 		// update keys_buf
 		if (i<8){
 			pPS2_keyboard->keys_buf[i] = fkeys_buf[i];
@@ -174,12 +193,15 @@ int KBParse(PS2_keyboard_t* pPS2_keyboard)
 		}
 	}
 	
+	pPS2_keyboard->new_data = x;
+
 	// log
 	message("fkeys_buf: "); for (i=0; i<8; i++){ number(fkeys_buf[i]); message(" "); } message(eol);
-	message("*keys_buf: "); for (i=0; i<14; i++){ number(pPS2_keyboard->keys_buf[i]); message(" "); } message(eol);
+	message("keys_buf:  "); for (i=0; i<14; i++){ number(pPS2_keyboard->keys_buf[i]); message(" "); } message(eol);
+	message("scan_buf:  "); number(pPS2_keyboard->scan_buf[0]); message(" "); number(pPS2_keyboard->scan_buf[1]);message(eol);
 	message("test flag: "); n = test>>8; number (n); n = test; number (n); message(eol);
-	
-	return Found;
+
+	return 0;
  }
 
 unsigned char USB_PS2(unsigned char USB_code)

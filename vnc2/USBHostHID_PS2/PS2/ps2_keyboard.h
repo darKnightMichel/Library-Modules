@@ -9,6 +9,7 @@
    unsigned char new_data;
    unsigned char usbkb_buf[8];
    unsigned char keys_buf[14];
+   unsigned char scan_buf[2];
  } PS2_keyboard_t;
  
  //char CHECK_BIT(unsigned short  wBYTE, char wBIT);

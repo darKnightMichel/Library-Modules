@@ -1,7 +1,8 @@
-//-----------------------------------------------------------------[24.05.2015]
+//-----------------------------------------------------------------[25.05.2015]
 // 21.05.2015	dsp		initail relise
 // 22.05.2015	MVV		Bit 7=1 указывает на префикс 0xE0, добавлены: 0x00=Overrun Error, 0x80=POST Fail, 0x7f=None. Исправлен код Caps Lock
 // 24.05.2015	MVV		тестовая версия
+// 25.05.2015	MVV		добавлен keyboard thread
 
 /*
 ** Filename: USBHostHID2.c
@@ -35,8 +36,7 @@
 vos_tcb_t *tcbFIRMWARE;
 
 void USB_thread();
-void PS2_MSthread(void);
-void PS2_KBthread(void);
+void PS2_thread(void);
 
 /* FTDI:ETP */
 
@@ -52,17 +52,14 @@ VOS_HANDLE hUsb[2];
 /* Declaration for IOMUx setup function */
 void iomux_setup(void);
 
-//=================================================================My
-
-//===========================================
 HIDParser_t        hid_parser;
 HIDParser_t*	   pParser;
 HIDData_t		   hid_parce_data;
+
 //hid_parser.pData = &hid_parce_data;
-//-----------------------------------
 HIDData_t   hid_data;
 HIDData_t*  phid_data;
-//--------------------------
+
 unsigned char MS_OK;
 ReportID_t 	ReportID_MS[10];
 HIDData_t   hid_Bdata;
@@ -73,7 +70,7 @@ HIDData_t   hid_Ydata;
 HIDData_t*  phid_Ydata;
 HIDData_t   hid_Wdata;
 HIDData_t*  phid_Wdata;
-//===================================
+
 uchar 		max_ReportID;
 ReportID_t 	ReportID_tbl[10];
 
@@ -84,16 +81,15 @@ PS2_mouse_t PS2_MS;
 int Xpos;
 int Ypos;
 
-unsigned char *pDATA;
-
 //KEYBOARD
 PS2_keyboard_t    PS2_KB;	
 PS2_keyboard_t*  pPS2_KB;
 
+unsigned char *pDATA;
+
+
 // test buffer
 char buf[0x80];
-
-//============================================
 
 usbhost_ioctl_cb_dev_info_t		ifInfo;
 usbhost_ioctl_cb_class_t		hc_iocb_class;
@@ -131,8 +127,6 @@ void main(void)
 	// Initialise GPIO A
 	gpioContextA.port_identifier = GPIO_PORT_A;
 	gpio_init(VOS_DEV_GPIO_PORT_A, &gpioContextA);
-	//-----------
-	
 	
 	// Initialise USB Host
 	usbhostContext.if_count = 8;
@@ -143,9 +137,9 @@ void main(void)
 	/* FTDI:EDI */
 
 	/* FTDI:SCT Thread Creation */
-	tcbFIRMWARE = vos_create_thread_ex(20, 4096, USB_thread,   "USB_thread",   0);
-	tcbFIRMWARE = vos_create_thread_ex(20, 2048, PS2_MSthread, "PS2_MSthread", 0);
-	//tcbFIRMWARE = vos_create_thread_ex(20, 2048, PS2_KBthread, "PS2_KBthread", 0);
+	tcbFIRMWARE = vos_create_thread_ex(20, 4096, USB_thread, "USB_thread", 0);
+	tcbFIRMWARE = vos_create_thread_ex(20, 1048, PS2_thread, "PS2_thread", 0);
+
 	/* FTDI:ECT */
 
 	vos_start_scheduler();
@@ -155,7 +149,6 @@ main_loop:
 }
 
 /* FTDI:SSP Support Functions */
-
 unsigned char usbhost_connect_state(VOS_HANDLE hUSB)
 {
 	unsigned char connectstate = PORT_STATE_DISCONNECTED;
@@ -177,7 +170,6 @@ unsigned char usbhost_connect_state(VOS_HANDLE hUSB)
 }
 
 /* FTDI:ESP */
-
 //------------------------------------------------------------------------------
 void open_drivers(void)
 {
@@ -213,12 +205,13 @@ void close_drivers(void)
 //------------------------------------------------------------------------------
 void message(char *msg)
 {
-	 vos_dev_write(hUART, (unsigned char *) msg, strlen(msg), NULL);
+//	 vos_dev_write(hUART, (unsigned char *) msg, strlen(msg), NULL);
 }
 
 //------------------------------------------------------------------------------
 void number(unsigned char val)
-{  
+{
+/*
 	char			letter;
 	unsigned char	nibble;
 	
@@ -233,6 +226,7 @@ void number(unsigned char val)
 		nibble += ('A' - '9' - 1);
 
 	vos_dev_write(hUART, &nibble, 1, NULL);
+*/
 }
 
 //void D_number(unsigned char val)
@@ -254,24 +248,24 @@ void USB_thread(void)
 	unsigned short written;
 	unsigned char status;
 	unsigned char n, m;
-	//==============================================
+
 	unsigned char USBaddress, DeviceSpeed, Location;
 	unsigned char descIndex;
 	unsigned char byteCount;
 
-	unsigned char *keys_buf;
 	ushort XYW;
 	uchar Found[2], FoundB[2], FoundX[2], FoundY[2], FoundW[2];
 	int Xpos, Ypos, Wheel, Buttons;
-	//==============================================
 
 	// device handle
 	usbhost_device_handle_ex ifDev;
+
 	// endpoint handles
 	usbhost_ep_handle_ex epInt[2], epCtrl[2];
+
 	// endpoint maxPacketLength values
 	unsigned char maxPack[2];
-	
+
 	// completion semaphore and set semaphore list
 	vos_semaphore_t endpointSem[2];
 
@@ -291,16 +285,14 @@ void USB_thread(void)
 	// endpoint information
 	usbhost_ioctl_cb_ep_info_t epInfo;
 	
-	hid_parser.pData = &hid_parce_data; //
-	pParser   		 = &hid_parser; //<-  INPUT STR
-	//----------------------------
-	phid_data 		 = &hid_data;   //<== OUTPUT STR
-	//--------------------------------
+	hid_parser.pData = &hid_parce_data;
+	pParser = &hid_parser;		// INPUT STR
+
+	phid_data = &hid_data;		// OUTPUT STR
 	phid_Bdata = &hid_Bdata;
 	phid_Xdata = &hid_Xdata;		
 	phid_Ydata = &hid_Ydata;
 	phid_Wdata = &hid_Wdata;
-	//--------------------------------
 
 	epInt[0] = NULL;
 	epCtrl[0] = NULL;
@@ -317,16 +309,12 @@ void USB_thread(void)
 	FoundY[1] = 0;
 	FoundW[0] = 0;
 	FoundW[1] = 0;
+	
 	memset(buf, 0, sizeof(buf));
-	//================================================
 	//PS2dev_init ();
 	open_drivers();
 	PS2dev_init ();
 	PS2dev_unlock();
-	//=============
-	
-	//hUsb[0] = hUSBHOST_1;
-	//hUsb[1] = hUSBHOST_2;
 	hUsb[0] = hUSBHOST_2;
 	hUsb[1] = hUSBHOST_1;
 
@@ -359,8 +347,6 @@ void USB_thread(void)
 	uart_iocb.set.param = UART_PARITY_NONE;
 	vos_dev_ioctl(hUART, &uart_iocb);
 	
-	//=================================================
-	
 
 	message("Starting...\r\n");
 	
@@ -392,7 +378,7 @@ void USB_thread(void)
 						break;
 					}
 
-					// user ioctl to find control endpoint on this device ====================!!!!!!!!!!!!!!
+					// user ioctl to find control endpoint on this device
 					hc_iocb.ioctl_code = VOS_IOCTL_USBHOST_DEVICE_GET_CONTROL_ENDPOINT_HANDLE;
 					hc_iocb.handle.dif = ifDev;
 					hc_iocb.get = &epCtrl[n];    // usbhost_ep_handle_ex epInt[2], epCtrl[2];
@@ -436,8 +422,8 @@ void USB_thread(void)
 						break;
 					}
 					maxPack[n] = epInfo.max_size;
-					//==========================================================================
-					//========Report Desciptor==================================================
+
+					// Report Desciptor
 					descIndex =0x0;
 					desc_dev.bmRequestType	=	USB_BMREQUESTTYPE_DEV_TO_HOST |
 												USB_BMREQUESTTYPE_STANDARD |
@@ -448,7 +434,7 @@ void USB_thread(void)
 					desc_dev.wValue			=	(USB_DESCRIPTOR_TYPE_REPORT << 8) | descIndex;
 					desc_dev.wIndex			=	0x0000;
 					desc_dev.wLength		=	0x00ff;
-					//----------------------------------
+
 					hc_iocb.ioctl_code		=	VOS_IOCTL_USBHOST_DEVICE_SETUP_TRANSFER;
 					hc_iocb.handle.ep		=	epCtrl[n];
 					hc_iocb.set				=	&desc_dev;
@@ -467,7 +453,7 @@ void USB_thread(void)
 					message("Report Descriptor : ");
 					number(descIndex);
 					message(eol);
-                    //============================================================		
+
 					for (byteCount = 0x0; byteCount < 0x80; byteCount++)
 					{
 						number(pParser->ReportDesc[byteCount]);
@@ -481,9 +467,7 @@ void USB_thread(void)
 						if  (byteCount == 0x6F) {message(eol);}
 						if  (byteCount == 0x7F) {message(eol);}
 					}
-					//==Copy;
-					//===============================================================================
-					//===============================================================================
+					// Copy;
 					ResetParser(pParser) ;
 					pParser->ReportDescSize = REPORT_DSC_SIZE;
 					max_ReportID = FindReport_max_ID(pParser);
@@ -494,34 +478,28 @@ void USB_thread(void)
 					message("Max Report ID : ");
 					number(max_ReportID);
 					message(eol);
-					//======================HID DATA ===============================================================
-					//TRACE("preparing search path of depth %d for parse tree of USB device %s...",depth, hidif->id);
+					// HID DATA
+					// TRACE("preparing search path of depth %d for parse tree of USB device %s...",depth, hidif->id);
 					for (i=0; i < PATH_SIZE; ++i) {
 						phid_data->Path_Node[i].UPage = 0x00;
 						phid_data->Path_Node[i].Usage = 0x00;
 					}
 					phid_data->Path_Size = PATH_SIZE;
-					//==============================================================
+
 					Found[n]  = FindMouse_Buttons(pParser, phid_data)  ;
 					if(Found[n]){
 						PS2_MS.conected = 1;
 						memcpy(ReportID_MS, ReportID_tbl, 10 * sizeof(ReportID_t));
-
 						//ResetParser(pParser) ; //Restart
 						FoundB[n]  = FindMouse_Buttons(pParser, phid_Bdata)  ;
-						
 						XYW = 0x30; //X - pos
 						FoundX[n] = FindMouse_XYW(pParser, phid_Xdata, XYW);
-						
 						XYW = 0x31; //Y - pos
 						FoundY[n] = FindMouse_XYW(pParser, phid_Ydata, XYW);
-						
 						XYW = 0x38; //Wheel
 						FoundW[n] = FindMouse_XYW(pParser, phid_Wdata, XYW);
 					}
-					//=======================================================================================
-					//=======================================================================================
-					//-----------------Data extracting---------------
+					// Data extracting
 					message(eol);
 					if (FoundB[n]){
 						message("Mouse Button was found ");
@@ -563,7 +541,7 @@ void USB_thread(void)
 						number(phid_Wdata->Size);
 						message(eol);
 					}
-					//==========================SETUP_TRANSFER======================
+					// SETUP_TRANSFER
 					// Prepare to transfer Data
 					desc_dev.bmRequestType	=	USB_BMREQUESTTYPE_HOST_TO_DEV |
 												USB_BMREQUESTTYPE_CLASS |
@@ -572,7 +550,7 @@ void USB_thread(void)
 					desc_dev.wValue			=	0;
 					desc_dev.wIndex			=	0;
 					desc_dev.wLength		=	0;
-					//----------------------------------
+ 
 					hc_iocb.ioctl_code		=	VOS_IOCTL_USBHOST_DEVICE_SETUP_TRANSFER;
 					hc_iocb.handle.ep		=	epCtrl[n];
 					hc_iocb.set				=	&desc_dev;
@@ -586,8 +564,8 @@ void USB_thread(void)
 			} // end of epCtrl[i] == NULL
 		} // end of for (n = 0; n < 2; i++)
 
-		//message("Second Part "); ===================================================
-		// message(eol);           ===================================================
+		//message("Second Part ");
+		//message(eol);
 		//if (epCtrl[0] || epCtrl[1])
 		if (epCtrl[0])
 		{
@@ -633,8 +611,7 @@ void USB_thread(void)
 						break;
 					}
 				}
-
-				if (n != 0 && epCtrl[1]) // first: n=-1
+			if (n != 0 && epCtrl[1]) // first: n=-1
 				{
 					sem_list->list[1] = &endpointSem[1];
 					xfer[1].len = maxPack[1];
@@ -651,17 +628,14 @@ void USB_thread(void)
 						break;
 					}
 				}
-
 				// Wait on a key press from either endpoint...
 				n = vos_wait_semaphore_ex(sem_list);
-
 				// Display data received
 				message("Port ");
 				number(n);
 				message(" Data: ");
 
-				//===========================================================
-				// Display the data from the keyboard...=====================
+				// Display the data from the keyboard...
 				if (n == 0)
 				{
 					//  sem0 has signalled
@@ -680,9 +654,7 @@ void USB_thread(void)
 					}	
 						message(eol);
 				}
-				
-				//===============================================
-				//-----------------Data extracting---------------
+				// Data extracting
 				if (FoundB[n]){
 					GetValue(buf,  phid_Bdata, ReportID_MS);
 					PS2_MS.Button = phid_Bdata->Value;
@@ -725,8 +697,6 @@ void USB_thread(void)
 					number(*pDATA);
 					message(eol);
 				}
-				
-				
 				if (FoundB[n] || FoundX[n] || FoundY[n] || FoundW[n]){   //MS
 					PS2_MS.new_data = 0x1;
 				} else {                                                 //KB
@@ -734,13 +704,10 @@ void USB_thread(void)
 						// D_number(buf[i]);	// RX USB KB
 						PS2_KB.usbkb_buf[i] = buf[i];
 					}
-					//memcpy(PS2_KB.usbkb_buf, buf, 8 * sizeof(char));
-					PS2_KB.new_data = 0x1;
-					
-					// PARSE
+					// Parse keys
 					KBParse(pPS2_KB);
 				}
-				// Log
+				// log
 				message(eol);
 			}
 		}
@@ -749,36 +716,52 @@ void USB_thread(void)
 }
 
 //------------------------------------------------------------------------------
-void PS2_MSthread(void)
+void PS2_thread(void)
 {
+	unsigned char  i;
 	unsigned char  cmd;
 	unsigned char  req;
-	unsigned int   CLK;
+	unsigned int   timer;
+	unsigned int   timer1;
 	
-	CLK = 0;
-	
+	timer = 0;
+//	timer1 = 0;
+
 	do {
-		req = PS2dev_host_req();      // PS2_clk or PS2_data - Low;
-		if(req && PS2_MS.conected) {  
-			while(PS2dev_read(&cmd))  ;   
-			MS_cmd(cmd, &PS2_MS);
-			CLK = 50000; 
+		// Keyboard
+/*		if(pPS2_KB->new_data == 0x00){
+			timer1 = 0;
 		}
-		else{ // == SEND BYTEs from USB device
-			if(PS2_MS.StreamMode && PS2_MS.DataRepEN && PS2_MS.new_data && CLK == 0) {		
+*/		
+		if((pPS2_KB->new_data == 0x01)/* && (timer1 = 0)*/){
+//			timer1 = 10;
+			PS2KB_write(pPS2_KB->scan_buf[0]);
+			PS2KB_write(pPS2_KB->scan_buf[1]);
+			// log
+			message("PS2KB <- "); number(pPS2_KB->scan_buf[0]); message(" "); number(pPS2_KB->scan_buf[1]);message("\r\n");
+		}
+/*		if (timer1 > 0){
+			timer1--;
+		}
+*/
+		// Mouse
+		req = PS2dev_host_req();	// PS2_clk or PS2_data - Low;
+		if(req && PS2_MS.conected) {  
+			while(PS2dev_read(&cmd));   
+			MS_cmd(cmd, &PS2_MS);
+			timer = 50000; 
+		} else { // SEND BYTEs from USB device
+			if(PS2_MS.StreamMode && PS2_MS.DataRepEN && PS2_MS.new_data && timer == 0){		
 				MS_wr_packet(&PS2_MS);
 				PS2_MS.new_data = 0x0;
 			}
-			if (CLK > 0){
-			CLK--;
+			if (timer > 0){
+				timer--;
 			}
 		}
+
 	}
 	while (1);
 }
-
+	
 //------------------------------------------------------------------------------
-void PS2_KBthread(void)
-{
-	;
-}
