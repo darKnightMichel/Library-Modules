@@ -1,8 +1,9 @@
-//-----------------------------------------------------------------[25.05.2015]
+//-----------------------------------------------------------------[02.06.2015]
 // 21.05.2015	dsp		initail relise
 // 22.05.2015	MVV		Bit 7=1 указывает на префикс 0xE0, добавлены: 0x00=Overrun Error, 0x80=POST Fail, 0x7f=None. Исправлен код Caps Lock
 // 24.05.2015	MVV		тестовая версия UART 9600 8bit nc stop1 nc
 // 25.05.2015	MVV		добавлен PS2_thread
+// 02.06.2015	dsp		fix 0x83 (key F7)
 
 #include <string.h>
 #include "ps2_keyboard.h"
@@ -13,8 +14,6 @@
 void message(char *msg);
 void number(unsigned char val);
 	
-unsigned char Fkeys []     = {	0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7}; // F-Keys
-
 //Bit 7=1 указывает на префикс 0xE0, 0x00=Overrun Error, 0x80=POST Fail, 0x7f=None
 unsigned char USB_PS2_tb [] ={	0x7f, 0x00, 0x80, 0x7f, 0x1c, 0x32, 0x21, 0x23, 
 								0x24, 0x2b, 0x34, 0x33, 0x43, 0x3b, 0x42, 0x4b,
@@ -112,7 +111,7 @@ int KBParse(PS2_keyboard_t* pPS2_keyboard)
 	// fkeys & keys
 	for (i=0; i<8; i++){
 		if (pPS2_keyboard->usbkb_buf[0] & (1<< i)){
-			fkeys_buf[i] = Fkeys[i];
+			fkeys_buf[i] = 0xE0+i;
 		} else {
 			fkeys_buf[i] = 0x00;
 		}
@@ -139,12 +138,12 @@ int KBParse(PS2_keyboard_t* pPS2_keyboard)
 			n = USB_PS2(pPS2_keyboard->keys_buf[i]);
 			// log
 			message("n release: "); number (n); message(eol);
-			if ((n < 0x7F) && (n > 0x00)){
+			if (((n < 0x7F) && (n > 0x00)) || n == 0x83){
 				PS2KB_write(0xF0);	// Break
 				PS2KB_write(n);
 				// log
 				message("PS2KB <- F0 "); number(n); message(eol);
-			} else if (n > 0x80){
+			} else if ((n > 0x80) && (n != 0x83)){
 				PS2KB_write(0xE0);	// Pref
 				PS2KB_write(0xF0);	// Break
 				PS2KB_write(n-0x80);
@@ -160,7 +159,7 @@ int KBParse(PS2_keyboard_t* pPS2_keyboard)
 		}
 		// log
 		message("n press: "); number(n); message(eol);
-		if (n > 0x80){
+		if ((n > 0x80) && (n != 0x83)){
 			PS2KB_write(0xE0);	// Pref
 //			vos_delay_msecs(50);
 			PS2KB_write(n-0x80);
@@ -177,7 +176,7 @@ int KBParse(PS2_keyboard_t* pPS2_keyboard)
 			x = 0x01;
 			// log
 			message("PS2KB <- FC (POST Fail)"); message(eol);
-		} else if (n < 0x7F){
+		} else if ((n < 0x7F) || (n == 0x83)){
 			PS2KB_write(n);
 			pPS2_keyboard->scan_buf[0] = n;
 			pPS2_keyboard->scan_buf[1] = n;

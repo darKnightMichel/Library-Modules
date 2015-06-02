@@ -839,8 +839,7 @@ LD8	(%r1)	$4
 LD16	%r1	$1
 ADD16	%r1	%r0
 CPY16	%r2	%r1
-CPY16	%r3	%r2
-LD8	(%r3)	$0
+LD8	(%r2)	$0
 PUSH16	%r0
 PUSH16	hUART
 SP_DEC	$1
@@ -848,9 +847,9 @@ CALL	vos_dev_ioctl
 POP8	%eax
 SP_WR8	%eax	$171
 SP_INC	$4
-CPY16	%r3	%r0
-LD8	(%r3)	$34
-CPY16	%r2	%r2
+CPY16	%r2	%r0
+LD8	(%r2)	$34
+CPY16	%r2	%r1
 LD32	(%r2)	$9600
 PUSH16	%r0
 PUSH16	hUART

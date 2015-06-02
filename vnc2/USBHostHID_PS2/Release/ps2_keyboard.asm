@@ -7,8 +7,6 @@
 .WEAK	"%r1"
 .WEAK	"%r2"
 .WEAK	"%r3"
-Fkeys	.DB	8	-32, -31, -30, -29, -28, -27, -26, -25
-.GLOBAL	  DO_NOT_EXPORT "Fkeys"
 USB_PS2_tb	.DB	256	127, 0, -128, 127, 28, 50, 33, 35, 36, 43, 52, 51, 67, 59, 66, 75, 58, 49, 68, 77, 21, 45, 27, 44, 60, 42, 29, 34, 53, 26, 22, 30, 38, 37, 46, 54, 61, 62, 70, 69, 90, 118, 102, 13, 41, 78, 85, 84, 91, 93, 93, 76, 82, 14, 65, 73, 74, 88, 5, 6, 4, 12, 3, 11, -125, 10, 1, 9, 120, 7, -4, 126, -9, -16, -20, -3, -15, -23, -6, -12, -21, -14, -11, 119, -54, 124, 123, 121, 26, 105, 114, 122, 107, 115, 116, 108, 117, 125, 112, 113, 97, -81, 127, 15, 47, 55, 63, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 109, 127, 81, 19, 106, 100, 103, 39, 127, 127, 127, 127, 127, 99, 98, 95, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 20, 18, 17, -97, -108, 89, -111, -89, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127
 .GLOBAL	  DO_NOT_EXPORT "USB_PS2_tb"
 Str@0	.ASCIIZ	"\r\n"
@@ -331,7 +329,8 @@ PUSH32	%r2
 PUSH32	%r3
 SP_DEC	$28
 LD32	%r1	$Str@0
-SP_WR16	%r1	$0
+SP_STORE	%ecx
+CPY16	(%ecx)	%r1
 LD16	%ecx	$0
 SP_WR16	%ecx	$2
 LD8	%ecx	$0
@@ -363,8 +362,8 @@ SP_INC	$2
 INC8	%r0	$1
 JUMP	@IC1
 @IC2:	
-SP_RD16	%eax	$0
-PUSH16	%eax
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
 LD8	%r0	$0
@@ -391,12 +390,10 @@ CPY32	%r1	%eax
 SP_STORE	%r2
 INC16	%r2	$5
 ADD16	%r1	%r2
-CPY8	%eax	%r0
-AND32	%eax	$255
-CPY32	%r2	%eax
-LD16	%r3	$Fkeys
-ADD16	%r2	%r3
-CPY8	%r2	(%r2)
+CPY8	%ebx	%r0
+AND16	%ebx	$255
+LD32	%eax	$224
+ADD32	%r2	%eax	%ebx
 CPY8	(%r1)	%r2
 JUMP	@IC13
 @IC14:	
@@ -438,8 +435,9 @@ JGE	@IC20
 LD8	%ecx	$2
 SP_WR8	%ecx	$13
 @IC24:	
-SP_RD8	%ecx	$13
-CMP8	%ecx	$8
+SP_STORE	%ecx
+INC16	%ecx	$13
+CMP8	(%ecx)	$8
 JGE	@IC25
 @IC26:	
 SP_STORE	%r1
@@ -502,8 +500,9 @@ CALL	CHECK_BIT
 POP8	%eax
 SP_WR8	%eax	$17
 SP_INC	$3
-SP_RD8	%ecx	$14
-CMP8	%ecx	$0
+SP_STORE	%ecx
+INC16	%ecx	$14
+CMP8	(%ecx)	$0
 JNZ	@IC40
 @IC41:	
 SP_RD16	%r1	$51
@@ -529,17 +528,24 @@ SP_RD16	%eax	$16
 PUSH8	%eax
 CALL	number
 SP_INC	$1
-SP_RD16	%eax	$0
-PUSH16	%eax
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
-SP_RD8	%ecx	$16
-CMP8	%ecx	$127
-JGE	@IC45
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$127
+JGE	@IC47
+@IC48:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$0
+JGT	@IC46
 @IC47:	
-SP_RD8	%ecx	$16
-CMP8	%ecx	$0
-JLE	@IC45
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$131
+JNZ	@IC45
 @IC46:	
 PUSH8	$240
 SP_DEC	$1
@@ -568,10 +574,16 @@ CALL	message
 SP_INC	$2
 JUMP	@IC44
 @IC45:	
-SP_RD8	%ecx	$16
-CMP8	%ecx	$128
-JLE	@IC52
-@IC53:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$128
+JLE	@IC55
+@IC57:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$131
+JZ	@IC55
+@IC56:	
 PUSH8	$224
 SP_DEC	$1
 CALL	PS2KB_write
@@ -601,16 +613,16 @@ SP_INC	$2
 PUSH8	%r1
 CALL	number
 SP_INC	$1
-SP_RD16	%eax	$0
-PUSH16	%eax
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
-@IC52:	
+@IC55:	
 @IC44:	
 @IC40:	
 CMP8	%r0	$8
-JGE	@IC57
-@IC58:	
+JGE	@IC63
+@IC64:	
 CPY8	%eax	%r0
 AND32	%eax	$255
 CPY32	%r1	%eax
@@ -626,8 +638,8 @@ SP_WR8	%eax	$23
 SP_INC	$1
 SP_RD8	%ecx	$22
 SP_WR8	%ecx	$16
-JUMP	@IC56
-@IC57:	
+JUMP	@IC62
+@IC63:	
 SP_RD16	%r1	$51
 INC16	%r1	$1
 CPY8	%eax	%r0
@@ -644,7 +656,7 @@ SP_WR8	%eax	$24
 SP_INC	$1
 SP_RD8	%ecx	$23
 SP_WR8	%ecx	$16
-@IC56:	
+@IC62:	
 LD32	%r1	$Str@6
 PUSH16	%r1
 CALL	message
@@ -653,14 +665,20 @@ SP_RD16	%eax	$16
 PUSH8	%eax
 CALL	number
 SP_INC	$1
-SP_RD16	%eax	$0
-PUSH16	%eax
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
-SP_RD8	%ecx	$16
-CMP8	%ecx	$128
-JLE	@IC62
-@IC63:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$128
+JLE	@IC68
+@IC70:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$131
+JZ	@IC68
+@IC69:	
 PUSH8	$224
 SP_DEC	$1
 CALL	PS2KB_write
@@ -699,12 +717,13 @@ SP_RD16	%eax	$0
 PUSH16	%eax
 CALL	message
 SP_INC	$2
-JUMP	@IC61
-@IC62:	
-SP_RD8	%ecx	$16
-CMP8	%ecx	$128
-JNZ	@IC67
+JUMP	@IC67
 @IC68:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$128
+JNZ	@IC76
+@IC77:	
 PUSH8	$252
 SP_DEC	$1
 CALL	PS2KB_write
@@ -726,16 +745,22 @@ LD32	%r1	$Str@8
 PUSH16	%r1
 CALL	message
 SP_INC	$2
-SP_RD16	%eax	$0
-PUSH16	%eax
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
-JUMP	@IC66
-@IC67:	
-SP_RD8	%ecx	$16
-CMP8	%ecx	$127
-JGE	@IC71
-@IC72:	
+JUMP	@IC75
+@IC76:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$127
+JLT	@IC81
+@IC82:	
+SP_STORE	%ecx
+INC16	%ecx	$16
+CMP8	(%ecx)	$131
+JNZ	@IC80
+@IC81:	
 SP_RD16	%eax	$16
 PUSH8	%eax
 SP_DEC	$1
@@ -766,16 +791,16 @@ SP_RD16	%eax	$16
 PUSH8	%eax
 CALL	number
 SP_INC	$1
-SP_RD16	%eax	$0
-PUSH16	%eax
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
-@IC71:	
-@IC66:	
-@IC61:	
+@IC80:	
+@IC75:	
+@IC67:	
 CMP8	%r0	$8
-JGE	@IC76
-@IC77:	
+JGE	@IC88
+@IC89:	
 SP_RD16	%r1	$51
 INC16	%r1	$9
 CPY8	%eax	%r0
@@ -790,8 +815,8 @@ INC16	%r3	$5
 ADD16	%r2	%r3
 CPY8	%r2	(%r2)
 CPY8	(%r1)	%r2
-JUMP	@IC75
-@IC76:	
+JUMP	@IC87
+@IC88:	
 SP_STORE	%r1
 INC16	%r1	$51
 CPY16	%r2	(%r1)
@@ -809,7 +834,7 @@ SUB32	%r3	%eax	%ebx
 ADD16	%r1	%r3
 CPY8	%r1	(%r1)
 CPY8	(%r2)	%r1
-@IC75:	
+@IC87:	
 @IC37:	
 INC8	%r0	$1
 JUMP	@IC34
@@ -824,10 +849,10 @@ PUSH16	%r1
 CALL	message
 SP_INC	$2
 LD8	%r0	$0
-@IC80:	
+@IC92:	
 CMP8	%r0	$8
-JGE	@IC81
-@IC82:	
+JGE	@IC93
+@IC94:	
 CPY8	%eax	%r0
 AND32	%eax	$255
 CPY32	%r1	%eax
@@ -842,12 +867,12 @@ LD32	%r1	$Str@11
 PUSH16	%r1
 CALL	message
 SP_INC	$2
-@IC83:	
+@IC95:	
 INC8	%r0	$1
-JUMP	@IC80
-@IC81:	
-SP_RD16	%eax	$0
-PUSH16	%eax
+JUMP	@IC92
+@IC93:	
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
 LD32	%r1	$Str@12
@@ -855,10 +880,10 @@ PUSH16	%r1
 CALL	message
 SP_INC	$2
 LD8	%r0	$0
-@IC86:	
+@IC98:	
 CMP8	%r0	$14
-JGE	@IC87
-@IC88:	
+JGE	@IC99
+@IC100:	
 SP_RD16	%r1	$51
 INC16	%r1	$9
 CPY8	%eax	%r0
@@ -873,12 +898,12 @@ LD32	%r1	$Str@13
 PUSH16	%r1
 CALL	message
 SP_INC	$2
-@IC89:	
+@IC101:	
 INC8	%r0	$1
-JUMP	@IC86
-@IC87:	
-SP_RD16	%eax	$0
-PUSH16	%eax
+JUMP	@IC98
+@IC99:	
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
 LD32	%r1	$Str@14
@@ -924,8 +949,8 @@ SP_RD8	%r1	$2
 PUSH8	%r1
 CALL	number
 SP_INC	$1
-SP_RD16	%eax	$0
-PUSH16	%eax
+SP_STORE	%eax
+PUSH16	(%eax)
 CALL	message
 SP_INC	$2
 LD32	%eax	$0
